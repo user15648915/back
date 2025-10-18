@@ -1,0 +1,17 @@
+# IDE/OS files
+.vs/
+.DS_Store
+
+# Python files
+__pycache__/
+*.pyc
+
+# Virtual Environment
+venv/
+.venv/
+# Если вы используете conda, добавьте:
+# conda/
+
+# Environment Variables and Secrets (MUST NOT be shared)
+.env
+*.env
