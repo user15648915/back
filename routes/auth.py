@@ -13,6 +13,9 @@ auth_bp = Blueprint("auth", __name__)
 @auth_bp.route("/register", methods=["POST"])
 def register():
     data = request.json
+    email = data.get("email")
+    password = data.get("password")
+    name = data.get("name")
     if not data.get("email") or not data.get("password"):
         return jsonify({"error": "Email и пароль обязательны"}), 400
 

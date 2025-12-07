@@ -2,6 +2,12 @@ from flask import Blueprint, request, jsonify
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from extensions import db
 from models import Category
+from sqlalchemy import or_
+
+# 📌 2. ОПРЕДЕЛИТЕ ADMIN_USER_ID
+# Пожалуйста, проверьте в вашем файле seed_data.py, какой ID вы присвоили администратору. 
+# Чаще всего это ID 1. Если нет, измените это число.
+ADMIN_USER_ID = 0
 
 categories_bp = Blueprint("categories", __name__)
 
@@ -9,8 +15,26 @@ categories_bp = Blueprint("categories", __name__)
 @jwt_required()
 def list_categories():
     user_id = int(get_jwt_identity())
-    cats = Category.query.filter_by(user_id=user_id).all()
-    return jsonify([{"id": c.id, "name": c.name} for c in cats]), 200
+    
+    # 🌟 ИСПРАВЛЕННЫЙ ЗАПРОС:
+    # Ищем категории, где user_id равен ID текущего пользователя ИЛИ ADMIN_USER_ID
+    cats = Category.query.filter(
+        or_(
+            Category.user_id == user_id, 
+            Category.user_id == ADMIN_USER_ID 
+        )
+    ).all()
+    
+    # Включаем информацию об уровне и публичности в ответ
+    return jsonify([
+        {
+            "id": c.id, 
+            "name": c.name, 
+            "level": c.level,
+            "is_public": c.user_id == ADMIN_USER_ID # Для фронтенда: это публичная категория?
+        } 
+        for c in cats
+    ]), 200
 
 @categories_bp.route("", methods=["POST"])
 @jwt_required()

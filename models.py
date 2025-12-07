@@ -8,19 +8,34 @@ class User(db.Model):
     password = db.Column(db.String(200), nullable=False)
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
+    studying_count = db.Column(db.Integer, default=0, nullable=False) 
+    learned_count = db.Column(db.Integer, default=0, nullable=False)
+
 class Category(db.Model):
-    __tablename__ = "categories"
+    __tablename__ = "categories" # Добавлено для консистентности
     id = db.Column(db.Integer, primary_key=True)
+    # 💥 ИСПРАВЛЕНИЕ 1: Ссылка на 'users.id'
+    user_id = db.Column(db.Integer, db.ForeignKey('users.id'), nullable=False) 
     name = db.Column(db.String(100), nullable=False)
-    user_id = db.Column(db.Integer, db.ForeignKey("users.id"), nullable=False)
+    level = db.Column(db.String(5), nullable=False, default='USER') 
+    
+    # 💥 Отношение определено ОДИН раз. Оно создаст Category.flashcards И Flashcard.category
+    flashcards = db.relationship('Flashcard', backref='category', lazy=True)
+
 
 class Flashcard(db.Model):
     __tablename__ = "flashcards"
     id = db.Column(db.Integer, primary_key=True)
     front = db.Column(db.String(255), nullable=False)
     back = db.Column(db.String(255), nullable=False)
+    # Ссылки на категории и пользователей
     category_id = db.Column(db.Integer, db.ForeignKey("categories.id"))
     user_id = db.Column(db.Integer, db.ForeignKey("users.id"))
+    
+    # 💥 ИСПРАВЛЕНИЕ 2: Удалено конфликтное определение db.relationship
+    # Свойство 'category' теперь создается автоматически через backref в Category.
+    # Если бы вы хотели определить его здесь, вы бы использовали back_populates.
+
 
 class QuizResult(db.Model):
     __tablename__ = "quiz_results"
@@ -38,5 +53,5 @@ class RepetitionSchedule(db.Model):
     repetitions = db.Column(db.Integer, default=0)
     efactor = db.Column(db.Float, default=2.5)
     interval = db.Column(db.Integer, default=1)
-
+    flashcard = db.relationship('Flashcard', backref='schedules', lazy=True)
     flashcard = db.relationship("Flashcard", backref="schedule")

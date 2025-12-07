@@ -10,7 +10,7 @@ class Config:
     SECRET_KEY = os.getenv("SECRET_KEY", "supersecretkey")
 
     # 🔌 Подключение к базе данных PostgreSQL
-    SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URL")
+    SQLALCHEMY_DATABASE_URI = os.getenv("DATABASE_URL") or 'postgresql://user:password@localhost/flashcards_db'
     SQLALCHEMY_TRACK_MODIFICATIONS = False
 
     # 🔐 Настройки JWT
